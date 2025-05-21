@@ -45,9 +45,12 @@ RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
 # Install VS Code Server
 RUN curl -fsSL https://code-server.dev/install.sh | sh
 
-# Copy Claude Code installation script
+# Copy Claude Code installation script and fix line endings
 COPY scripts/install-claude-code.sh /tmp/install-claude-code.sh
-RUN chmod +x /tmp/install-claude-code.sh && /tmp/install-claude-code.sh
+RUN apt-get install -y dos2unix && \
+    dos2unix /tmp/install-claude-code.sh && \
+    chmod +x /tmp/install-claude-code.sh && \
+    bash /tmp/install-claude-code.sh
 
 # Create a non-root user (developer)
 RUN useradd -m -s /bin/bash developer && \

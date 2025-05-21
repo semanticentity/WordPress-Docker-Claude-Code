@@ -131,6 +131,11 @@ You can install plugins and themes directly through the WordPress admin interfac
    - If you have services already using ports 8000, 8080, 8081, or 13306, modify the port mappings in `docker-compose.yml`
    - MySQL port is exposed on 13306 instead of the default 3306 to avoid conflicts
 
+5. **Line ending issues when using Git across different platforms**:
+   - This project includes a `.gitattributes` file that normalizes line endings
+   - The Dockerfile also uses `dos2unix` to ensure scripts have proper line endings
+   - If you encounter "file not found" errors for shell scripts, try rebuilding with `docker-compose build --no-cache`
+
 ## License
 
 This project is released under the MIT License.
