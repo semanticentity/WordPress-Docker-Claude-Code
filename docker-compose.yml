@@ -1,0 +1,100 @@
+version: '3.8'
+
+services:
+  # Development Environment with Claude Code and VS Code Server
+  devenv:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: claude-wp-devenv
+    volumes:
+      # Mount the host Docker socket to allow Docker in Docker
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Mount the WordPress code directory
+      - ./wordpress:/home/developer/wordpress
+      # Mount any SSH keys (optional)
+      - ~/.ssh:/home/developer/.ssh:ro
+    ports:
+      # VS Code Server port
+      - "8080:8080"
+      # Additional ports for development
+      - "3000:3000"
+      - "9000:9000"
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      # Add any other required environment variables
+    restart: unless-stopped
+    depends_on:
+      - db
+      - wordpress
+    networks:
+      - wp-network
+
+  # WordPress Container
+  wordpress:
+    image: wordpress:latest
+    container_name: claude-wp-wordpress
+    volumes:
+      # Mount WordPress content for direct editing
+      - ./wordpress:/var/www/html
+      # Custom wp-config
+      - ./config/wp-config.php:/var/www/html/wp-config.php
+      # Custom PHP configuration
+      - ./config/php.ini:/usr/local/etc/php/conf.d/custom.ini
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DEBUG: 1
+    ports:
+      - "8000:80"
+    depends_on:
+      - db
+    restart: unless-stopped
+    networks:
+      - wp-network
+  
+  # Database Container
+  db:
+    image: mysql:8.0
+    container_name: claude-wp-db
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./config/mysql:/etc/mysql/conf.d
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+    ports:
+      - "13306:3306"
+    restart: unless-stopped
+    networks:
+      - wp-network
+  
+  # PhpMyAdmin (optional)
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: claude-wp-phpmyadmin
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+    ports:
+      - "8081:80"
+    depends_on:
+      - db
+    networks:
+      - wp-network
+
+# Persistent Volumes
+volumes:
+  db_data:
+    name: claude-wp-db-data
+
+# Docker Networks
+networks:
+  wp-network:
+    name: claude-wp-network
+    driver: bridge

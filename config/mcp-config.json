@@ -1,0 +1,17 @@
+{
+  "servers": [
+    {
+      "name": "brightdata",
+      "command": "npx -y @brightdata/mcp",
+      "autostart": false,
+      "description": "Brightdata MCP server for web scraping and research"
+    }
+  ],
+  "settings": {
+    "defaultTerminal": "bash",
+    "autoStartEnabled": false,
+    "loggingEnabled": true,
+    "loggingLevel": "info",
+    "maxConcurrentRequests": 3
+  }
+}

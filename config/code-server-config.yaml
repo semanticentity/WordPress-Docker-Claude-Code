@@ -1,0 +1,7 @@
+bind-addr: 0.0.0.0:8080
+auth: none
+password: developer
+cert: false
+user-data-dir: /home/developer/.local/share/code-server
+extensions-dir: /home/developer/.local/share/code-server/extensions
+disable-telemetry: true
