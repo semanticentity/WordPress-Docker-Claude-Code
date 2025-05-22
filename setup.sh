@@ -35,6 +35,130 @@ echo -e "\n${YELLOW}Creating necessary directories...${NC}"
 mkdir -p wordpress
 mkdir -p config/mysql
 
+# Set up instance ID for port calculation
+INSTANCE_ID=1
+echo -e "\n${YELLOW}Configuring instance ID for multi-instance support...${NC}"
+read -p "Enter an instance ID number (default: 1): " input_instance_id
+if [ -n "$input_instance_id" ] && [[ "$input_instance_id" =~ ^[0-9]+$ ]]; then
+    INSTANCE_ID=$input_instance_id
+fi
+
+# Calculate port offsets based on instance ID
+PORT_OFFSET=$((($INSTANCE_ID - 1) * 10))
+VS_CODE_PORT=$((8080 + $PORT_OFFSET))
+WORDPRESS_PORT=$((8000 + $PORT_OFFSET))
+PHPMYADMIN_PORT=$((8081 + $PORT_OFFSET))
+MYSQL_PORT=$((13306 + $PORT_OFFSET))
+DEV_PORT1=$((3000 + $PORT_OFFSET))
+DEV_PORT2=$((9000 + $PORT_OFFSET))
+
+# Create or update docker-compose override file with dynamic ports
+cat > docker-compose.yml << EOF
+services:
+  # Development Environment with Claude Code and VS Code Server
+  devenv:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: claude-wp-devenv${INSTANCE_ID}
+    volumes:
+      # Mount the host Docker socket to allow Docker in Docker
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Mount the WordPress code directory
+      - ./wordpress:/home/developer/wordpress
+      # Mount any SSH keys (optional)
+      - ~/.ssh:/home/developer/.ssh:ro
+    ports:
+      # VS Code Server port
+      - "${VS_CODE_PORT}:8080"
+      # Additional ports for development
+      - "${DEV_PORT1}:3000"
+      - "${DEV_PORT2}:9000"
+    environment:
+      - ANTHROPIC_API_KEY=\${ANTHROPIC_API_KEY}
+      # Add any other required environment variables
+    restart: unless-stopped
+    depends_on:
+      - db
+      - wordpress
+    networks:
+      - wp-network
+
+  # WordPress Container
+  wordpress:
+    image: wordpress:latest
+    container_name: claude-wp-wordpress${INSTANCE_ID}
+    volumes:
+      # Mount WordPress content for direct editing
+      - ./wordpress:/var/www/html
+      # Custom wp-config
+      - ./config/wp-config.php:/var/www/html/wp-config.php
+      # Custom PHP configuration
+      - ./config/php.ini:/usr/local/etc/php/conf.d/custom.ini
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DEBUG: 1
+    ports:
+      - "${WORDPRESS_PORT}:80"
+    depends_on:
+      - db
+    restart: unless-stopped
+    networks:
+      - wp-network
+  
+  # Database Container
+  db:
+    image: mysql:8.0
+    container_name: claude-wp-db${INSTANCE_ID}
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - db_data${INSTANCE_ID}:/var/lib/mysql
+      - ./config/mysql:/etc/mysql/conf.d
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+    ports:
+      - "${MYSQL_PORT}:3306"
+    restart: unless-stopped
+    networks:
+      - wp-network
+  
+  # PhpMyAdmin (optional)
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: claude-wp-phpmyadmin${INSTANCE_ID}
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+    ports:
+      - "${PHPMYADMIN_PORT}:80"
+    depends_on:
+      - db
+    networks:
+      - wp-network
+
+# Persistent Volumes
+volumes:
+  db_data${INSTANCE_ID}:
+    name: claude-wp-db-data${INSTANCE_ID}
+
+# Docker Networks
+networks:
+  wp-network:
+    name: claude-wp-network${INSTANCE_ID}
+    driver: bridge
+EOF
+
+echo -e "${GREEN}Docker Compose configuration created with instance ID ${INSTANCE_ID}${NC}"
+echo -e "VS Code will be available at port ${VS_CODE_PORT}"
+echo -e "WordPress will be available at port ${WORDPRESS_PORT}"
+echo -e "PhpMyAdmin will be available at port ${PHPMYADMIN_PORT}"
+
 # Set up Anthropic API Key
 echo -e "\n${YELLOW}Configuring Anthropic API Key...${NC}"
 read -p "Enter your Anthropic API Key (or press Enter to skip for now): " anthropic_key
@@ -64,18 +188,21 @@ docker-compose up -d
 if [ $? -eq 0 ]; then
     echo -e "\n${GREEN}Development environment started successfully!${NC}"
     echo -e "\n${BLUE}You can access the following services:${NC}"
-    echo -e "VS Code Server: ${GREEN}http://localhost:8080${NC}"
-    echo -e "WordPress Site: ${GREEN}http://localhost:8000${NC}"
-    echo -e "PhpMyAdmin:    ${GREEN}http://localhost:8081${NC}"
+    echo -e "VS Code Server: ${GREEN}http://localhost:${VS_CODE_PORT}${NC}"
+    echo -e "WordPress Site: ${GREEN}http://localhost:${WORDPRESS_PORT}${NC}"
+    echo -e "PhpMyAdmin:    ${GREEN}http://localhost:${PHPMYADMIN_PORT}${NC}"
     
     echo -e "\n${BLUE}Usage Instructions:${NC}"
-    echo -e "1. Access VS Code Server at ${GREEN}http://localhost:8080${NC}"
+    echo -e "1. Access VS Code Server at ${GREEN}http://localhost:${VS_CODE_PORT}${NC}"
     echo -e "2. Open the terminal in VS Code and run: ${GREEN}claude${NC} to start Claude Code"
     echo -e "3. Your WordPress files are available at: ${GREEN}/home/developer/wordpress${NC}"
-    echo -e "4. Database can be managed via PhpMyAdmin at ${GREEN}http://localhost:8081${NC}"
+    echo -e "4. Database can be managed via PhpMyAdmin at ${GREEN}http://localhost:${PHPMYADMIN_PORT}${NC}"
     echo -e "   (Username: wordpress, Password: wordpress)"
     echo -e "5. To stop the environment, run: ${GREEN}docker-compose down${NC}"
     echo -e "6. To restart, run: ${GREEN}docker-compose up -d${NC}"
+    
+    echo -e "\n${YELLOW}Note: This instance is using ID ${INSTANCE_ID}. To run multiple instances,${NC}"
+    echo -e "${YELLOW}run this script again in a different directory and choose a different ID.${NC}"
 else
     echo -e "\n${RED}Failed to start the development environment.${NC}"
     echo -e "Please check the error messages above and try again."

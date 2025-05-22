@@ -5,6 +5,7 @@ This project provides a complete development environment that combines:
 - **VS Code Server** - Web-based VS Code IDE
 - **WordPress** - Fresh WordPress installation for development
 - **Remote accessibility** - Accessible from any device with a web browser
+- **Multi-instance support** - Run multiple isolated environments simultaneously
 
 ## System Requirements
 
@@ -28,12 +29,16 @@ This project provides a complete development environment that combines:
    ```
 
 3. Follow the prompts to configure your environment
+   - Enter an instance ID (default: 1) to set port offsets
    - Enter your Anthropic API key when prompted
 
 4. Once setup completes, access the environment:
-   - VS Code Server: http://localhost:8080
-   - WordPress Site: http://localhost:8000
-   - PhpMyAdmin: http://localhost:8081
+   - VS Code Server: http://localhost:8080 (default for instance 1)
+   - WordPress Site: http://localhost:8000 (default for instance 1)
+   - PhpMyAdmin: http://localhost:8081 (default for instance 1)
+
+   Note: If you choose a different instance ID, ports will be offset accordingly.
+   For instance ID 2: ports would be 8090, 8010, 8091, etc.
 
 ## Features
 
@@ -110,6 +115,29 @@ To access WordPress admin:
 ### Adding WordPress Plugins/Themes
 
 You can install plugins and themes directly through the WordPress admin interface, or by adding files to the appropriate directories in `wordpress/wp-content/`.
+
+### Running Multiple Instances
+
+This environment supports running multiple instances simultaneously:
+
+1. **Create separate directories** for each instance:
+   ```bash
+   cp -r WordPress-Docker-Claude-Code instance2
+   cd instance2
+   ```
+
+2. **Run the setup script** and specify a different instance ID:
+   ```bash
+   ./setup.sh
+   # When prompted, enter "2" (or any unique number) for the instance ID
+   ```
+
+3. **Port allocation** is automatically handled:
+   - Instance 1: 8080, 8000, 8081, 13306, etc.
+   - Instance 2: 8090, 8010, 8091, 13316, etc.
+   - Instance 3: 8100, 8020, 8101, 13326, etc.
+
+This allows you to run completely separate WordPress environments with different plugins, themes, and databases simultaneously.
 
 ## Troubleshooting
 
