@@ -66,6 +66,7 @@ The environment is now running.
 
 *   **VS Code Server:** [https://localhost](https://localhost)
 *   **WordPress Site:** [https://localhost](https://localhost)
+*   **Management Dashboard:** [http://localhost:3000](http://localhost:3000)
 *   **PhpMyAdmin:** [http://localhost:8081](http://localhost:8081) (port may vary based on instance ID).
 
 ## Development Workflow
