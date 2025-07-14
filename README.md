@@ -1,45 +1,38 @@
-# Claude Code + WordPress Docker Development Environment
+# WordPress Docker Development Environment with Claude Code
 
-Hey there, future coding wizard! Welcome to your new favorite WordPress development environment. We've cooked up something special to make your life easier, combining the power of Docker with the magic of Anthropic's Claude Code.
+This project provides a comprehensive, Docker-based development environment for WordPress. It includes a VS Code Server with Claude Code integration, enabling a powerful and efficient development workflow.
 
-This setup gives you a complete, isolated development environment that you can spin up and tear down with just a few commands. No more messing with local server configurations!
+The environment is designed to be self-contained and reproducible, minimizing the need for complex local machine configuration.
 
-## What's Inside?
+## Features
 
-*   **A full-fledged IDE in your browser:** We're using VS Code Server, so you get a familiar, powerful coding experience.
-*   **The latest and greatest WordPress:** A fresh installation is ready for you to start building.
-*   **Claude Code on demand:** Get help from your AI coding partner right in the terminal.
-*   **Local HTTPS:** Develop with a secure connection, just like in production.
-*   **Easy testing:** Run your plugin's tests with a single command.
-*   **Multi-instance support:** Run multiple, separate WordPress sites at the same time.
+*   **Integrated Development Environment:** VS Code Server provides a web-based IDE with pre-installed extensions for PHP and web development.
+*   **WordPress Ready:** Includes the latest version of WordPress, a MySQL database, and PhpMyAdmin for database management.
+*   **AI-Assisted Development:** Pre-configured with Anthropic's Claude Code for AI-powered code generation and assistance.
+*   **Local HTTPS:** Supports local HTTPS using `mkcert` for a production-like development environment.
+*   **Automated Testing:** Includes a pre-configured PHPUnit testing environment for plugin development.
+*   **Multi-Instance Support:** Allows for running multiple, isolated WordPress instances simultaneously.
 
 ## Prerequisites
 
-Before you can use this environment, you'll need to have a few tools installed on your computer. Don't worry, we'll walk you through it.
+The following software must be installed on your host machine:
 
-### Docker and Docker Compose
-
-This is the core of our setup. It's a tool that lets us run our development environment in a "container," which is like a lightweight virtual machine.
-
-*   **On macOS:** The easiest way to get Docker and Docker Compose is to install [Docker Desktop for Mac](https://docs.docker.com/desktop/mac/install/).
-*   **On Windows:** You'll want to install [Docker Desktop for Windows](https://docs.docker.com/desktop/windows/install/).
-*   **On Linux:** You can follow the official instructions to install the [Docker Engine](https://docs.docker.com/engine/install/) and the [Docker Compose plugin](https://docs.docker.com/compose/install/).
-
-### Node.js and npm
-
-We use `npm` to run our testing script. `npm` comes bundled with Node.js.
-
-*   **On macOS and Windows:** The easiest way to install Node.js and `npm` is to download the installer from the [official Node.js website](https://nodejs.org/).
-*   **On Linux:** You can use your distribution's package manager to install Node.js and `npm`. For example, on Ubuntu, you would run `sudo apt update && sudo apt install nodejs npm`.
+*   **Docker and Docker Compose:** The foundation of the containerized environment.
+    *   **macOS:** [Docker Desktop for Mac](https://docs.docker.com/desktop/mac/install/)
+    *   **Windows:** [Docker Desktop for Windows](https://docs.docker.com/desktop/windows/install/)
+    *   **Linux:** [Docker Engine](https://docs.docker.com/engine/install/) and [Docker Compose plugin](https://docs.docker.com/compose/install/)
+*   **Node.js and npm:** Used for running utility scripts.
+    *   **macOS and Windows:** [Node.js Installer](https://nodejs.org/)
+    *   **Linux:** `sudo apt update && sudo apt install nodejs npm` (or equivalent for your distribution).
 
 ## System Requirements
 
-*   **At least 10GB of free disk space:** This is important! The Docker images can be chunky.
-*   **An Anthropic API key:** You'll need this to use Claude Code.
+*   **Disk Space:** A minimum of 10GB of free disk space is recommended.
+*   **API Key:** An Anthropic API key is required for Claude Code functionality.
 
-## Quick Start
+## Getting Started
 
-1.  **Clone this repository:**
+1.  **Clone the repository:**
     ```bash
     git clone https://github.com/IncomeStreamSurfer/WordPress-Docker-Claude-Code.git
     cd WordPress-Docker-Claude-Code
@@ -49,15 +42,15 @@ We use `npm` to run our testing script. `npm` comes bundled with Node.js.
     ```bash
     bash setup.sh
     ```
-    This will ask you for an instance ID (you can just press Enter to use the default) and your Anthropic API key.
+    This script will prompt for an instance ID and your Anthropic API key.
 
-3.  **Generate your local SSL certificates:**
+3.  **Generate SSL certificates:**
     ```bash
     bash scripts/generate-certs.sh
     ```
-    You only need to do this once. This will create a `config/certs` directory with your SSL certificates.
+    This one-time command creates the necessary SSL certificates for local HTTPS.
 
-4.  **Install the npm dependencies:**
+4.  **Install npm dependencies:**
     ```bash
     npm install
     ```
@@ -67,54 +60,56 @@ We use `npm` to run our testing script. `npm` comes bundled with Node.js.
     docker compose up -d
     ```
 
-That's it! Your environment is up and running.
+The environment is now running.
 
-## How to Use Your New Environment
+## Accessing the Environment
 
 *   **VS Code Server:** [https://localhost](https://localhost)
 *   **WordPress Site:** [https://localhost](https://localhost)
-*   **PhpMyAdmin:** [http://localhost:8081](http://localhost:8081) (or whatever port was assigned during setup)
+*   **PhpMyAdmin:** [http://localhost:8081](http://localhost:8081) (port may vary based on instance ID).
 
-### Working with Your Code
+## Development Workflow
 
-All of your WordPress files are in the `wordpress` directory. Any changes you make there will be instantly reflected in your running WordPress site.
+### Code Editing
+
+The `wordpress` directory is mounted into the WordPress container. Any changes made to these files on the host machine will be immediately reflected in the running application.
 
 ### Running Tests
 
-We've set up a super simple way to run your plugin's tests. Just run this command in your terminal:
+To run the PHPUnit tests for the included `hello` plugin, execute the following command:
 
 ```bash
 npm test
 ```
 
-This will run the PHPUnit tests for the `hello` plugin. You can use this as a starting point for your own tests.
+This provides a template for setting up tests for your own plugins.
 
 ### Stopping the Environment
 
-When you're done for the day, you can stop the environment with this command:
+To stop the Docker containers, run:
 
 ```bash
 docker compose down
 ```
 
-## Roadmap
+## Project Roadmap
 
-This project is just getting started. We have a lot of ideas for making it even better. We're calling these our "graceful DX love bombs" because we want to make the developer experience as delightful as possible.
+This project is under active development. Future enhancements include:
 
-*   **Smarter Setup Script:** An enhanced `setup.sh` that can detect if prerequisites are missing and offer to install them for the user.
-*   **Management Dashboard:** A web-based interface to manage all of your WordPress instances, like Local by Flywheel.
-*   **Local Image Caching:** A local Docker registry to cache images and speed up the setup process, reducing the need to re-download images.
-*   **More Blueprints:** Pre-configured setups for common WordPress development scenarios (e.g., WooCommerce, a specific theme, etc.).
-*   **Automated Deployments:** A more robust deployment system using GitHub Actions.
+*   **Enhanced Setup Script:** A more robust setup script that can detect and install missing prerequisites.
+*   **Management Dashboard:** A web-based UI for managing multiple WordPress instances.
+*   **Local Image Caching:** A local Docker registry to improve setup times and reduce bandwidth usage.
+*   **Development Blueprints:** Pre-configured environments for specific development scenarios (e.g., WooCommerce, specific themes).
+*   **CI/CD Integration:** Automated deployment pipelines using GitHub Actions.
 
-If you have any ideas, feel free to open an issue or a pull request!
+Contributions and suggestions are welcome.
 
 ## Troubleshooting
 
-*   **"No space left on device" error:** This means your hard drive is full. You'll need to free up some space to run the environment.
-*   **Port conflicts:** If you have other services running on ports 80, 443, or 8081, you can change the ports in the `docker-compose.yml` file.
-*   **`npm test` fails:** Make sure your Docker environment is running (`docker compose up -d`).
+*   **"No space left on device" error:** This indicates insufficient disk space on the host machine.
+*   **Port conflicts:** If another service is using a required port, modify the port mappings in the `docker-compose.yml` file.
+*   **`npm test` fails:** Ensure the Docker environment is running (`docker compose up -d`).
 
 ## License
 
-This project is released under the MIT License.
+This project is licensed under the MIT License.
