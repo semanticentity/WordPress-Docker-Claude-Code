@@ -100,6 +100,18 @@ services:
     networks:
       - wp-network
 
+  # Management Dashboard
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+    container_name: claude-wp-dashboard1
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    networks:
+      - wp-network
+
 # Persistent Volumes
 volumes:
   db_data:
