@@ -1,176 +1,98 @@
 # Claude Code + WordPress Docker Development Environment
 
-This project provides a complete development environment that combines:
-- **Claude Code** - Anthropic's agentic coding assistant
-- **VS Code Server** - Web-based VS Code IDE
-- **WordPress** - Fresh WordPress installation for development
-- **Remote accessibility** - Accessible from any device with a web browser
-- **Multi-instance support** - Run multiple isolated environments simultaneously
+Hey there, future coding wizard! Welcome to your new favorite WordPress development environment. We've cooked up something special to make your life easier, combining the power of Docker with the magic of Anthropic's Claude Code.
+
+This setup gives you a complete, isolated development environment that you can spin up and tear down with just a few commands. No more messing with local server configurations!
+
+## What's Inside?
+
+*   **A full-fledged IDE in your browser:** We're using VS Code Server, so you get a familiar, powerful coding experience.
+*   **The latest and greatest WordPress:** A fresh installation is ready for you to start building.
+*   **Claude Code on demand:** Get help from your AI coding partner right in the terminal.
+*   **Local HTTPS:** Develop with a secure connection, just like in production.
+*   **Easy testing:** Run your plugin's tests with a single command.
+*   **Multi-instance support:** Run multiple, separate WordPress sites at the same time.
 
 ## System Requirements
 
-- **Docker** and **Docker Compose**
-- At least 4GB of free RAM
-- At least 10GB of free disk space
-- An Anthropic API key (for Claude Code)
+Before you dive in, make sure you have:
+
+*   **Docker and Docker Compose:** These are the tools that make all this magic happen. If you don't have them, you can find installation instructions here: [Get Docker](https://docs.docker.com/get-docker/)
+*   **At least 10GB of free disk space:** This is important! The Docker images can be chunky.
+*   **An Anthropic API key:** You'll need this to use Claude Code.
 
 ## Quick Start
 
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/IncomeStreamSurfer/WordPress-Docker-Claude-Code.git
-   cd WordPress-Docker-Claude-Code
-   ```
+1.  **Clone this repository:**
+    ```bash
+    git clone https://github.com/IncomeStreamSurfer/WordPress-Docker-Claude-Code.git
+    cd WordPress-Docker-Claude-Code
+    ```
 
-2. Run the setup script:
-   ```bash
-   chmod +x setup.sh
-   ./setup.sh
-   ```
+2.  **Run the setup script:**
+    ```bash
+    bash setup.sh
+    ```
+    This will ask you for an instance ID (you can just press Enter to use the default) and your Anthropic API key.
 
-3. Follow the prompts to configure your environment
-   - Enter an instance ID (default: 1) to set port offsets
-   - Enter your Anthropic API key when prompted
+3.  **Generate your local SSL certificates:**
+    ```bash
+    bash scripts/generate-certs.sh
+    ```
+    You only need to do this once. This will create a `config/certs` directory with your SSL certificates.
 
-4. Once setup completes, access the environment:
-   - VS Code Server: http://localhost:8080 (default for instance 1)
-   - WordPress Site: http://localhost:8000 (default for instance 1)
-   - PhpMyAdmin: http://localhost:8081 (default for instance 1)
+4.  **Start the environment:**
+    ```bash
+    docker compose up -d
+    ```
 
-   Note: If you choose a different instance ID, ports will be offset accordingly.
-   For instance ID 2: ports would be 8090, 8010, 8091, etc.
+That's it! Your environment is up and running.
 
-## Features
+## How to Use Your New Environment
 
-### Development Environment
+*   **VS Code Server:** [https://localhost](https://localhost)
+*   **WordPress Site:** [https://localhost](https://localhost)
+*   **PhpMyAdmin:** [http://localhost:8081](http://localhost:8081) (or whatever port was assigned during setup)
 
-- **Ubuntu 22.04** base with all necessary development tools
-- **VS Code Server** with pre-installed extensions for web development
-- **Claude Code** CLI pre-installed and configured
-- **GitHub CLI** for easy repository management
-- **Docker CLI** for container management from within the environment
+### Working with Your Code
 
-### WordPress Setup
+All of your WordPress files are in the `wordpress` directory. Any changes you make there will be instantly reflected in your running WordPress site.
 
-- **Latest WordPress** installation
-- **MySQL 8.0** database
-- **PhpMyAdmin** for database management
-- **PHP configuration** optimized for development
-- **Xdebug** for debugging PHP code
+### Running Tests
 
-### Claude Code
+We've set up a super simple way to run your plugin's tests. Just run this command in your terminal:
 
-- **Claude Code CLI** pre-installed and configured to work properly
-- **Custom installation script** to prevent common setup issues
-- **Error handling wrapper** to ensure smooth operation
-
-## Directory Structure
-
-```
-claude-wp-docker/
-├── config/                # Configuration files
-│   ├── code-server-config.yaml  # VS Code Server configuration
-│   ├── mysql/             # MySQL configuration
-│   ├── php.ini            # PHP configuration
-│   └── wp-config.php      # WordPress configuration
-├── scripts/               # Script files
-│   └── install-claude-code.sh   # Claude Code installation script
-├── wordpress/             # WordPress files (mounted into container)
-├── Dockerfile             # Development environment definition
-├── docker-compose.yml     # Service definitions
-├── setup.sh               # Setup script
-└── README.md              # This file
+```bash
+npm test
 ```
 
-## Usage Guide
+This will run the PHPUnit tests for the `hello` plugin. You can use this as a starting point for your own tests.
 
-### Starting Claude Code
+### Stopping the Environment
 
-1. Access the VS Code Server at http://localhost:8080
-2. Open a terminal in VS Code
-3. Type `claude` to start Claude Code
-4. Follow the authentication prompts if needed
+When you're done for the day, you can stop the environment with this command:
 
-### Working with WordPress
+```bash
+docker compose down
+```
 
-All WordPress files are available in the `/home/developer/wordpress` directory inside the container. Changes to these files will be reflected immediately on the WordPress site.
+## Roadmap
 
-To access WordPress admin:
-1. Visit http://localhost:8000/wp-admin
-2. Default credentials are:
-   - Username: `admin`
-   - Password: `password`
-   (You should change these immediately in a production environment)
+This project is just getting started. Here are some of the ideas we have for the future:
 
+*   **Management Dashboard:** A web-based interface to manage all of your WordPress instances, like Local by Flywheel.
+*   **Local Image Caching:** A local Docker registry to cache images and speed up the setup process.
+*   **More Blueprints:** Pre-configured setups for common WordPress development scenarios (e.g., WooCommerce, a specific theme, etc.).
+*   **Automated Deployments:** A more robust deployment system using GitHub Actions.
 
-### Managing the Environment
-
-- **Start environment**: `docker-compose up -d`
-- **Stop environment**: `docker-compose down`
-- **View logs**: `docker-compose logs -f`
-- **Rebuild containers**: `docker-compose build --no-cache`
-
-## Customization
-
-### Adding WordPress Plugins/Themes
-
-You can install plugins and themes directly through the WordPress admin interface, or by adding files to the appropriate directories in `wordpress/wp-content/`.
-
-### Running Multiple Instances
-
-This environment supports running multiple instances simultaneously:
-
-1. **Create separate directories** for each instance:
-   ```bash
-   cp -r WordPress-Docker-Claude-Code instance2
-   cd instance2
-   ```
-
-2. **Run the setup script** and specify a different instance ID:
-   ```bash
-   ./setup.sh
-   # When prompted, enter "2" (or any unique number) for the instance ID
-   ```
-
-3. **Port allocation** is automatically handled:
-   - Instance 1: 8080, 8000, 8081, 13306, etc.
-   - Instance 2: 8090, 8010, 8091, 13316, etc.
-   - Instance 3: 8100, 8020, 8101, 13326, etc.
-
-This allows you to run completely separate WordPress environments with different plugins, themes, and databases simultaneously.
+If you have any ideas, feel free to open an issue or a pull request!
 
 ## Troubleshooting
 
-### Common Issues
-
-1. **Can't access VS Code Server**:
-   - Check if the container is running: `docker ps`
-   - Check logs: `docker logs claude-wp-devenv`
-
-2. **Claude Code authentication fails**:
-   - Ensure your Anthropic API key is correctly set in the `.env` file
-   - Restart the container: `docker-compose restart devenv`
-
-3. **WordPress database connection error**:
-   - Check if the database container is running: `docker ps`
-   - Check database logs: `docker logs claude-wp-db`
-
-4. **Port conflicts**:
-   - If you have services already using ports 8000, 8080, 8081, or 13306, modify the port mappings in `docker-compose.yml`
-   - MySQL port is exposed on 13306 instead of the default 3306 to avoid conflicts
-
-5. **Line ending issues when using Git across different platforms**:
-   - This project includes a `.gitattributes` file that normalizes line endings
-   - The Dockerfile also uses `dos2unix` to ensure scripts have proper line endings
-   - If you encounter "file not found" errors for shell scripts, try rebuilding with `docker-compose build --no-cache`
+*   **"No space left on device" error:** This means your hard drive is full. You'll need to free up some space to run the environment.
+*   **Port conflicts:** If you have other services running on ports 80, 443, or 8081, you can change the ports in the `docker-compose.yml` file.
+*   **`npm test` fails:** Make sure your Docker environment is running (`docker compose up -d`).
 
 ## License
 
 This project is released under the MIT License.
-
-## Acknowledgements
-
-- [Anthropic](https://www.anthropic.com/) for Claude and Claude Code
-- [WordPress](https://wordpress.org/) for the CMS
-- [Docker](https://www.docker.com/) for containerization
-- [VS Code](https://code.visualstudio.com/) for the IDE

@@ -1,0 +1,16 @@
+{
+  "name": "claude-wp-docker",
+  "version": "1.0.0",
+  "description": "A Docker-based WordPress development environment with Claude Code.",
+  "scripts": {
+    "test": "bash scripts/test.sh"
+  },
+  "keywords": [
+    "wordpress",
+    "docker",
+    "claude",
+    "development"
+  ],
+  "author": "",
+  "license": "ISC"
+}

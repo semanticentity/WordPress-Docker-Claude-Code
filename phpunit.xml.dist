@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+    bootstrap="wordpress/wp-content/plugins/hello/tests/bootstrap.php"
+    backupGlobals="false"
+    colors="true"
+    convertErrorsToExceptions="true"
+    convertNoticesToExceptions="true"
+    convertWarningsToExceptions="true"
+    >
+    <testsuites>
+        <testsuite name="hello-plugin">
+            <directory prefix="test-" suffix=".php">./wordpress/wp-content/plugins/hello/tests/</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>

@@ -23,12 +23,24 @@ if ! command -v docker &> /dev/null; then
 fi
 
 # Check if Docker Compose is installed
-if ! command -v docker-compose &> /dev/null; then
+if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
     echo -e "${RED}Error: Docker Compose is not installed.${NC}"
     echo -e "Please install Docker Compose before running this script."
     echo -e "Visit https://docs.docker.com/compose/install/ for installation instructions."
     exit 1
 fi
+
+# Check for available disk space
+MIN_DISK_SPACE=10 # in GB
+echo -e "\n${YELLOW}Checking for at least ${MIN_DISK_SPACE}GB of free disk space...${NC}"
+AVAILABLE_DISK_SPACE=$(df -h . | awk 'NR==2 {print $4}' | sed 's/G//')
+if (( $(echo "$AVAILABLE_DISK_SPACE < $MIN_DISK_SPACE" | bc -l) )); then
+    echo -e "${RED}Error: Not enough disk space.${NC}"
+    echo -e "You have approximately ${AVAILABLE_DISK_SPACE}G of free space, but at least ${MIN_DISK_SPACE}G is required."
+    echo -e "Please free up some space and try again."
+    exit 1
+fi
+echo -e "${GREEN}Sufficient disk space available.${NC}"
 
 # Create necessary directories
 echo -e "\n${YELLOW}Creating necessary directories...${NC}"
