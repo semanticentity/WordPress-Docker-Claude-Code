@@ -14,19 +14,89 @@ echo -e "${BLUE}===============================================${NC}"
 echo -e "${BLUE}  Claude Code + WordPress Docker Setup Script  ${NC}"
 echo -e "${BLUE}===============================================${NC}"
 
-# Check if Docker is installed
-if ! command -v docker &> /dev/null; then
-    echo -e "${RED}Error: Docker is not installed.${NC}"
-    echo -e "Please install Docker and Docker Compose before running this script."
-    echo -e "Visit https://docs.docker.com/get-docker/ for installation instructions."
-    exit 1
-fi
+# Function to detect the operating system
+get_os() {
+    case "$(uname -s)" in
+        Darwin)
+            echo 'macOS'
+            ;;
+        Linux)
+            if [ -f /etc/os-release ]; then
+                . /etc/os-release
+                echo $ID
+            else
+                echo 'Linux'
+            fi
+            ;;
+        *)
+            echo 'Unsupported'
+            ;;
+    esac
+}
 
-# Check if Docker Compose is installed
-if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
-    echo -e "${RED}Error: Docker Compose is not installed.${NC}"
-    echo -e "Please install Docker Compose before running this script."
-    echo -e "Visit https://docs.docker.com/compose/install/ for installation instructions."
+# Function to check for a command and offer installation
+check_and_install() {
+    local cmd=$1
+    local install_info=$2
+    local install_cmd=$3
+
+    if ! command -v $cmd &> /dev/null; then
+        echo -e "${YELLOW}Warning: $cmd is not installed.${NC}"
+        read -p "Do you want to try and install it now? (y/N) " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            echo -e "${BLUE}Attempting to install $cmd...${NC}"
+            eval $install_cmd
+            if ! command -v $cmd &> /dev/null; then
+                echo -e "${RED}Error: Failed to install $cmd.${NC}"
+                echo -e "Please install it manually: $install_info"
+                exit 1
+            fi
+            echo -e "${GREEN}$cmd installed successfully.${NC}"
+        else
+            echo -e "${RED}Error: $cmd is required to proceed.${NC}"
+            echo -e "Please install it manually: $install_info"
+            exit 1
+        fi
+    fi
+}
+
+# Dependency checks
+OS=$(get_os)
+echo -e "\n${BLUE}Detected Operating System: $OS${NC}"
+
+case "$OS" in
+    macOS)
+        check_and_install "docker" "https://docs.docker.com/docker-for-mac/install/" "brew install --cask docker"
+        ;;
+    ubuntu|debian)
+        check_and_install "docker" "https://docs.docker.com/engine/install/ubuntu/" "sudo apt-get update && sudo apt-get install -y docker-ce docker-ce-cli containerd.io"
+        # On Linux, Docker Compose is often a plugin
+        if ! docker compose version &> /dev/null; then
+             check_and_install "docker-compose" "https://docs.docker.com/compose/install/" "sudo apt-get install -y docker-compose-plugin"
+        fi
+        ;;
+    *)
+        # Fallback for other systems, just check without offering to install
+        if ! command -v docker &> /dev/null; then
+            echo -e "${RED}Error: Docker is not installed.${NC}"
+            echo -e "Please install Docker and Docker Compose before running this script."
+            echo -e "Visit https://docs.docker.com/get-docker/ for installation instructions."
+            exit 1
+        fi
+        if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
+            echo -e "${RED}Error: Docker Compose is not installed.${NC}"
+            echo -e "Please install Docker Compose before running this script."
+            echo -e "Visit https://docs.docker.com/compose/install/ for installation instructions."
+            exit 1
+        fi
+        ;;
+esac
+
+# Check if Docker is running
+if ! docker info &> /dev/null; then
+    echo -e "${RED}Error: Docker is not running.${NC}"
+    echo -e "Please start the Docker daemon and try again."
     exit 1
 fi
 

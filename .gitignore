@@ -5,6 +5,7 @@
 # since this is a development environment
 # But exclude any potential uploads or dynamic content
 /wordpress/wp-content/uploads/
+/wordpress/wp-content/plugins/my-sample-plugin/vendor/
 
 # MCP server generated files
 /mcp-servers/**/node_modules/

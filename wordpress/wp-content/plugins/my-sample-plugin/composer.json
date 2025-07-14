@@ -1,0 +1,12 @@
+{
+    "name": "my-company/my-sample-plugin",
+    "require-dev": {
+        "phpunit/phpunit": "^10",
+        "brain/monkey": "^2.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "MySamplePlugin\\": "src/"
+        }
+    }
+}

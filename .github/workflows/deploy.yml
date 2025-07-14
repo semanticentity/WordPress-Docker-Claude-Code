@@ -1,0 +1,23 @@
+name: Deploy WordPress
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Deploy to server
+      env:
+        SSH_HOST: ${{ secrets.SSH_HOST }}
+        SSH_USER: ${{ secrets.SSH_USER }}
+        SSH_KEY: ${{ secrets.SSH_KEY }}
+        REMOTE_PATH: ${{ secrets.REMOTE_PATH }}
+      run: |
+        ./deploy.sh "$SSH_HOST" "$SSH_USER" "$SSH_KEY" "$REMOTE_PATH"
