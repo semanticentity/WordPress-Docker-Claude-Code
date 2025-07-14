@@ -46,7 +46,7 @@ check_and_install() {
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
             echo -e "${BLUE}Attempting to install $cmd...${NC}"
-            eval $install_cmd
+            $install_cmd
             if ! command -v $cmd &> /dev/null; then
                 echo -e "${RED}Error: Failed to install $cmd.${NC}"
                 echo -e "Please install it manually: $install_info"
@@ -67,7 +67,12 @@ echo -e "\n${BLUE}Detected Operating System: $OS${NC}"
 
 case "$OS" in
     macOS)
+        check_and_install "brew" "https://brew.sh/" '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'
         check_and_install "docker" "https://docs.docker.com/docker-for-mac/install/" "brew install --cask docker"
+        check_and_install "node" "https://nodejs.org/" "brew install node"
+        check_and_install "npm" "https://nodejs.org/" "brew install npm"
+        check_and_install "git" "https://git-scm.com/downloads" "brew install git"
+        check_and_install "mkcert" "https://github.com/FiloSottile/mkcert" "brew install mkcert"
         ;;
     ubuntu|debian)
         check_and_install "docker" "https://docs.docker.com/engine/install/ubuntu/" "sudo apt-get update && sudo apt-get install -y docker-ce docker-ce-cli containerd.io"
@@ -75,15 +80,20 @@ case "$OS" in
         if ! docker compose version &> /dev/null; then
              check_and_install "docker-compose" "https://docs.docker.com/compose/install/" "sudo apt-get install -y docker-compose-plugin"
         fi
+        check_and_install "node" "https://nodejs.org/" "sudo apt-get install -y nodejs"
+        check_and_install "npm" "https://nodejs.org/" "sudo apt-get install -y npm"
+        check_and_install "git" "https://git-scm.com/downloads" "sudo apt-get install -y git"
+        check_and_install "mkcert" "https://github.com/FiloSottile/mkcert" "bash scripts/install_mkcert.sh"
         ;;
     *)
         # Fallback for other systems, just check without offering to install
-        if ! command -v docker &> /dev/null; then
-            echo -e "${RED}Error: Docker is not installed.${NC}"
-            echo -e "Please install Docker and Docker Compose before running this script."
-            echo -e "Visit https://docs.docker.com/get-docker/ for installation instructions."
-            exit 1
-        fi
+        for cmd in docker node npm git mkcert; do
+            if ! command -v $cmd &> /dev/null; then
+                echo -e "${RED}Error: $cmd is not installed.${NC}"
+                echo -e "Please install it before running this script."
+                exit 1
+            fi
+        done
         if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
             echo -e "${RED}Error: Docker Compose is not installed.${NC}"
             echo -e "Please install Docker Compose before running this script."
